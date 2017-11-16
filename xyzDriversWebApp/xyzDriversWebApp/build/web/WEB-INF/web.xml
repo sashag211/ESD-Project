@@ -6,7 +6,7 @@
     </servlet>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>com.LoginServlet</servlet-class>
+        <servlet-class>Controller.LoginServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>RegsiterServlet</servlet-name>
@@ -14,7 +14,7 @@
     </servlet>
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
-        <servlet-class>com.RegisterServlet</servlet-class>
+        <servlet-class>Controller.RegisterServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginPage</servlet-name>
