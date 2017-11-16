@@ -19,6 +19,8 @@
             <input type="text" name="address"><br>
             Date of Birth:<br>
             <input type="text" name="dateofbirth"><br>
+            <input class="btn" type="submit" value="submit">
+            <input class="btn" type="reset" value="Reset">
         </form>
     </body>
 </html>
