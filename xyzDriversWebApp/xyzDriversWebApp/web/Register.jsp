@@ -14,12 +14,12 @@
     <body>
         <form>
             Name:<br>
-            <input type="text" name="name"><br>
+            <input type="text" name="fullName"><br>
             Address:<br>
             <input type="text" name="address"><br>
             Date of Birth:<br>
-            <input type="text" name="dateofbirth"><br>
-            <input class="btn" type="submit" value="submit">
+            <input type="date" name="DOB"><br>
+            <input class="btn" type="submit" value="Submit">
             <input class="btn" type="reset" value="Reset">
         </form>
     </body>
