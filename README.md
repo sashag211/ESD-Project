@@ -16,3 +16,9 @@ create table called "Users"
 columns include "username" "password" caps don't matter
 populate table with some details 
 run ?? (hopefully should work, if i have missed something and you know how to solve it, add it)
+
+
+
+Database Will be called XYZDriver
+Username : Root
+Password : 1234
