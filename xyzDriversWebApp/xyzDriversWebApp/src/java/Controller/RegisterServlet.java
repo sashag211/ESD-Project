@@ -5,9 +5,17 @@
  */
 package Controller;
 
+import model.DBConnection;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author j45-martin
+ * @author Frazer Pinheiro
  */
 public class RegisterServlet extends HttpServlet {
 
@@ -31,55 +39,73 @@ public class RegisterServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        JDBCBean bean = (JDBCBean) getServletContext().getAttribute("JDBCBean");
-        String errorMessage = "";
-        
-            RequestDispatcher view = request.getRequestDispatcher("Register.jsp");
-            view.forward(request, response);
-            
-        String fullName = request.getParameter("fullName");
-        //generating username
-        char initial = fullName.charAt(0);
-        String[] names = fullName.split(" ");
-        //Check if full name is entered
-        if (names.length < 2) {
-            errorMessage = "<div class=\"error\">\n"
-                    + "  <span class=\"errorMessageBtn\" onclick=\"this.parentElement.style.display='none';\">&times;</span> \n"
-                    + "  <strong>Full Name Required!</strong> \n"
-                    + "</div>";
-            request.setAttribute("ErrorMessage", errorMessage);
+        response.setContentType("text/html;charset=UTF-8");
+        RequestDispatcher view = request.getRequestDispatcher("Register.jsp");
+        view.forward(request, response);
 
-        } else {
-            String username = (initial + "-" + names[1]).toLowerCase();
-//            String streetNumber = request.getParameter("streetNumber");
-//            String streetName = request.getParameter("streetName");
-//            String city = request.getParameter("city");
-//            String postcode = request.getParameter("postcode");
-//            String country = request.getParameter("country");
+    }
 
-//            String address = streetNumber + ", " + streetName + ", " + city + ", " + postcode + ", " + country;
-            String address = request.getParameter("address");
-            String dob = request.getParameter("DOB");
-            //DOR to current date in YYYY-MM-DD format
-            SimpleDateFormat sqlDateFormatForRegistration = new SimpleDateFormat("yyyy-MM-dd");
-            String dor = sqlDateFormatForRegistration.format(Calendar.getInstance().getTime());
-            //password in DDMMYY format
-            String password = request.getParameter("DOB").replaceAll("(..)(..)-(..)-(..)", "$4$3$2");
-            float RegistrationFee = 10;
-            String defaultStatus = "APPLIED";
+    public void registerMember(String[] info) throws SQLException {
+        //String user = "root";
+        Connection con = null;
 
+        try {
+            Class.forName("org.apache.derby.jdbc.ClientDriver");
+            con = DriverManager.getConnection(DBConnection.HOST, DBConnection.USER, DBConnection.PASS);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-            bean.executeSQLUpdate("INSERT INTO `Members`(`id`, `name`, `address`, `dob`, `dor`, `status`, `balance`)"
-                    + "VALUES (" + "'" + username + "','" + fullName + "','" + address + "','" + dob + "','" + dor + "','" + defaultStatus + "'," + RegistrationFee + ")");
-            bean.executeSQLUpdate("INSERT INTO `users`(`id`, `password`, `status`)"
-                    + "VALUES (" + "'" + username + "','" + password + "','" + defaultStatus + "'" + ")");
-            
-            request.getRequestDispatcher("RegistrationSuccessful.jsp").forward(request, response);
-            request.setAttribute("registeredUsername", username);
-            request.setAttribute("registeredUsernamePassword", password);
+        String name = info[0];
+        String addr = info[1];
+        String dob = info[2];
+        LocalDate dor = LocalDate.now();
+        String status = "APPLIED";
+        double balance = 10;
 
-        }       
+        String id = generateID(name).toLowerCase();
 
+        String members = "INSERT INTO ROOT.MEMBERS VALUES ('" + id + "','" + name.trim() + "','" + addr.trim() + "','" + dob + "','" + dor + "','" + status + "'," + balance + ")";
+        String users = "INSERT INTO ROOT.USERS VALUES ('" + id + "','" + generatePassword(dob) + "','" + status + "')";
+
+        Statement state;
+        try {
+            state = con.createStatement();
+            state.executeUpdate(members);
+            state.executeUpdate(users);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public String generateID(String name) {
+        StringBuilder id = new StringBuilder();
+
+        id.append(name.charAt(0)).append("-");
+        int space = 0;
+
+        try {
+            space = name.indexOf(' ');
+        } catch (Exception e) {
+
+        }
+
+        for (int i = space + 1; i < name.length(); i++) {
+            id.append(name.charAt(i));
+        }
+
+        return id.toString();
+    }
+
+    public String generatePassword(String dob) {
+
+        dob = dob.replaceAll("-", "");
+
+        StringBuilder password = new StringBuilder(dob.substring(2)).reverse();
+
+        return password.toString();
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -108,7 +134,23 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String[] info = new String[3];
+        info[0] = request.getParameter("fullName").trim();// + " " + request.getParameter("lname").trim();
+        info[1] = request.getParameter("address");//+ ", " + request.getParameter("addr2") + ", " + request.getParameter("addr3") + ", " + request.getParameter("addr4");
+        info[2] = request.getParameter("dob");
+
+        System.out.println("name: " + info[0]);
+        System.out.println("address: " + info[1]);
+        System.out.println("dob: " + info[2]);
+
+        try {
+            registerMember(info);
+        } catch (SQLException ex) {
+            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        RequestDispatcher view = request.getRequestDispatcher("RegistrationSuccessful.jsp");
+        view.forward(request, response);
+
     }
 
     /**
