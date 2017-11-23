@@ -19,6 +19,5 @@ run ?? (hopefully should work, if i have missed something and you know how to so
 
 
 
-Database Will be called XYZDriver
-Username : Root
-Password : 1234
+
+Read the readme file in the derby app and focus on that one
