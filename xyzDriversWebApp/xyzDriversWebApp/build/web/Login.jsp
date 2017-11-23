@@ -12,12 +12,15 @@
         <title>Login</title>
     </head>
     <body>
+        <h1>Login Page</h1>
         <form>
             Username:<br>
-            <input type="text" name="username"><br>
+            <input type="text" name="User ID"><br>
             Password:<br>
-            <input type="text" name="password"><br>
-            <input class="btn" type="submit" value="Login">
+            <input type="password" name="Password"><br>
+            
+            <br>
+            <input method = "get" action = "/LoginServlet" class="btn" type="submit" value="Submit">
             <input class="btn" type="reset" value="Reset">
         </form>
     </body>
